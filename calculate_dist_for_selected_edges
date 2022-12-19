@@ -1,1 +1,37 @@
 
+import bpy
+import uuid
+from pathlib import Path
+import numpy as np
+
+mode = bpy.context.active_object.mode
+# we need to switch from Edit mode to Object mode so the selection gets updated
+bpy.ops.object.mode_set(mode='OBJECT')
+cursor = bpy.context.scene.cursor.location
+print(cursor)
+verts =  bpy.context.active_object.data.vertices
+selectedVerts = [v for v in bpy.context.active_object.data.vertices if v.select]
+selectedEdges =[ e for e in bpy.context.active_object.data.edges if e.select]
+out_arr = np.zeros((len(selectedEdges),8))
+for i,e in enumerate(selectedEdges):
+    print(e)
+    eindex = e.vertices
+    print(eindex)
+    start = verts[eindex[0]]
+    end = verts[eindex[1]]
+    print(start,"-->",end)
+    out_arr[i,0:3] = list(start.co)
+    out_arr[i,3:6] = list(end.co)
+    mid = (start.co + end.co)/2
+    dif = mid - cursor
+    
+    print(dif,dif.length)
+    out_arr[i,6] = dif.length
+    
+print(out_arr)
+# back to whatever mode we were in
+bpy.ops.object.mode_set(mode='EDIT')
+#print(cursor)
+outpth =Path.home()/"Downloads/voronoi_cracks"
+outpth.mkdir(exist_ok=True,parents=True)
+np.save(f"{outpth}/crack_{uuid.uuid4()}.npy",out_arr)
