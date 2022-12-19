@@ -1,0 +1,38 @@
+import bpy
+from pathlib import Path
+import numpy as np
+import json
+
+vdata = json.loads( open(Path.home()/"Downloads/untitled.json").read())
+
+#print(vdata)
+
+verts =[]
+edges =[]
+ei = 0
+for v in vdata:
+    start = v["start"]
+    end = v["end"]
+    svert = [start["x"],start["y"],0]
+    evert = [end["x"],end["y"],0]
+    
+    verts.append(svert)
+    verts.append(evert)
+    edges.append((ei*2,ei*2+1))
+    ei+=1
+
+print(verts)
+faces=[]
+
+new_mesh = bpy.data.meshes.new('new_mesh')
+
+new_mesh.from_pydata(verts, edges, faces)
+new_mesh.update()
+
+new_object = bpy.data.objects.new('new_object', new_mesh)
+
+
+
+new_collection = bpy.data.collections.new('new_collection')
+bpy.context.scene.collection.children.link(new_collection)
+new_collection.objects.link(new_object)
